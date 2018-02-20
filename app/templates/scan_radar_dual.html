@@ -1,0 +1,260 @@
+<script>
+    var SID = 12344;
+</script>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>PSD2 Data Overlays - Google Maps 3</title>
+</head>
+
+    <link rel="stylesheet" href="../static/css/psd/scan_radar.css">
+
+    <script src="http://maps.googleapis.com/maps/api/js?&key={{GOOGLE_API_KEY}}&sensor=false&v=3.8&" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="../static/css/psd/scan_radar.css">
+    <link rel="stylesheet" href="../static/css/jquery-1.8.2/jquery.ui.all.css">
+    <link rel="stylesheet" href="../static/css/jquery-1.8.2/jquery-ui-timepicker-addon.css">
+
+
+    <script src="../static/js/jquery-1.8.2/jquery-1.8.2.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery.ui.core.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery.ui.widget.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery.ui.mouse.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery.ui.slider.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery.ui.button.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery.ui.datepicker.js"></script>
+    <script src="../static/js/jquery-1.8.2/ui/jquery-ui-timepicker-addon.js"></script>
+  
+
+
+    <script src="../static/js/psd/datetimepicker.js"></script>
+    <script src="../static/js/psd/ProgressBar.js"></script>
+    <script src="../static/js/psd/scan_radar/widget_effects.js"></script>
+    <script src="../static/js/psd/scan_radar/prototypes.js"></script>
+    <script src="../static/js/psd/scan_radar/scan_radar_app.js"></script>
+
+
+
+
+<body onload="load()">
+
+    <table border=1 id="map_table" width="1200">
+
+        <tr>
+            <td>
+                <div id="Map1RadarTimeStamps"></div>
+            </td>
+
+            <td>
+                <div id="Map1LatestTimeStamp"></div>
+            </td>
+
+            <td>
+                <div id="Map2RadarTimeStamps"></div>
+            </td>
+
+            <td>
+                <div id="Map2LatestTimeStamp"></div>
+            </td>
+        </tr>
+
+        <tr>
+
+            <td id="widgets" colspan="4">
+                <table id="widgettable" border=0>
+                    <tr>
+                        <td id="tdslide1">
+
+                            <center>
+                                <button type "input" id="stepreverse" value="stepreverse" name="stepReverse" title="Step Back" onclick="changeDirection('stepback')"> </button>
+                                <button type "input" id="reverse" value="reverse" name="RadarReflReverse" title="Play Reverse" onclick="changeDirection('reverse')"> </button>
+                                <button type "input" id="stop" value="stop" name="RadarReflStop" title="Stop" onclick="changeDirection('stop')"> </button>
+                                <button type "input" id="play" value="play" name="RadarRefl" title="Play Forward" onclick="changeDirection('forward')"> </button>
+                                <button type "input" id="stepforward" value="stepforward" name="stepForward" title="Step Forward" onclick="changeDirection('stepforward')"> </button>
+                                <br>
+
+
+                                <center>
+                                    Animation Speed
+                                    <table width=200>
+                                        <tr>
+                                            <td width=50 align="right">
+                                                Slow
+                                            </td>
+                                            <td>
+                                                <div id="slider"> </div>
+                                            </td>
+                                            <td width=50 align="left">
+                                                Fast
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <center>
+
+                        </td>
+                        <td id="tdslide2">
+                            <center>
+                                Image Opacity
+                                <table width=200>
+                                    <tr>
+                                        <td width=50 align="right">
+                                            0%
+                                        </td>
+                                        <td>
+                                            <div id="Opacityslider"> </div>
+                                        </td>
+                                        <td width=50 align="left">
+                                            100%
+                                        </td>
+                                    </tr>
+                                </table>
+                            </center>
+                        </td>
+
+
+                        <td id="tdslide3">
+                            <center>
+
+                                Looptime (minutes)
+                                <br>
+                                <select id="LoopTime" onchange="setLoopTime(this);" />
+                                <option value="30">30</option>
+                                <option value="60">60</option>
+                                <option value="120">120</option>
+                                <option value="180">180</option>
+                                </select>
+
+                            </center>
+                        </td>
+
+
+                        <td id="tdslide4">
+                            <input type="radio" id="RealTimeID" name="RadioTime" value="Realtime" onclick="setRealTimeMark();">Realtime data <br>
+                            <input type="radio" id="ArchiveTimeID" name="RadioTime" value="Archive" onclick="setRealTimeMark();">Historical data
+                            <div id="CalendarID">
+                                End Date (GMT):<input id="ArchiveDateID" name="ArchiveDate" type="text" style="width: 120px"></a><input type="button" id="LoadArchiveDataID" value="Load Data" name="LoadArchiveData" onclick="loadArchiveData();">
+                                <br>
+                            </div>
+                            <div id="DownloadStatusID"> </div>
+                        </td>
+
+
+
+            </td>
+
+
+            </tr>
+            </table>
+
+
+
+
+        </tr>
+
+
+
+
+        <tr>
+
+            <td colspan="2">
+
+                Map1:
+                <select id="Map1RadarType" onchange="loadMap1RadarDataFiles(this, 1);" />
+                <option value="none">-</option>
+                <option value="dax">DAX (0.5 Reflectivity)</option>
+                <option value="kgo">KGO (0.5 Reflectivity)</option>
+                <option value="mux">MUX (0.5 Reflectivity)</option>
+                <option value="pix">PIX (0.5 Reflectivity)</option>
+                <option value="stc">STC (2.0 Reflectivity)</option>
+                <option value="stv">STC (2.0 Rainfall Rate)</option>
+                </select>
+                <a id="MapSynch1" href="#">Match Map 2 View</a>
+            </td>
+            <td colspan="2">
+
+                Map2:
+                <select id="Map2RadarType" onchange="loadMap2RadarDataFiles(this, 2);" />
+                <option value="none">-</option>
+                <option value="dax">DAX (0.5 Reflectivity)</option>
+                <option value="kgo">KGO (0.5 Reflectivity)</option>
+                <option value="mux">MUX (0.5 Reflectivity)</option>
+                <option value="pix">PIX (0.5 Reflectivity)</option>
+                <option value="stc">STC (2.0 Reflectivity)</option>
+                <option value="stv">STC (2.0 Rainfall Rate)</option>
+                </select>
+                <a id="MapSynch2" href="#">Match Map 1 View</a>
+
+            </td>
+
+        </tr>
+
+        <tr>
+            <td colspan="2">
+
+                <div id="MapDiv1" style="width: 600px; height: 600px"></div>
+            </td>
+
+            <td colspan="2">
+                <div id="MapDiv2" style="width: 600px; height: 600px"></div>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <center>
+                    <div id="Legend1" style="width: 600px;"></div>
+                </center>
+            </td>
+            <td colspan="2">
+                <center>
+                    <div id="Legend2" style="width: 600px;"></div>
+                </center>
+            </td>
+        </tr>
+
+
+        <tr>
+
+            <td colspan="4">
+                <div id="footer">
+                    <div id="orgs">
+                        <a href="http://www.doc.gov/">U.S. Department of Commerce</a> | <a href="http://www.noaa.gov/">National Oceanic and Atmospheric Administration</a>
+                        <br>
+                        <a href="http://www.esrl.noaa.gov">Earth System Research Laboratory</a> | <a href="/psd/">Physical Sciences Division</a>
+
+                        <br>
+                        <span class="url"><a href="/psd/about/contacts.html">http://www.esrl.noaa.gov/psd/about/contacts.html</a></span>
+                    </div>
+
+                    <div id="media_icons">
+                        <a href="https://www.facebook.com/NOAAESRL" title="ESRL Facebook"><i class="fa fa-2x fa-facebook"></i></a>&nbsp;
+                        <a href="https://twitter.com/NOAA_ESRL" title="ESRL Twitter"> <i class="fa fa-2x fa-twitter"></i></a>&nbsp;
+                        <a href="https://www.youtube.com/user/NOAAESRL" title="ESRL Youtube Channel"> <i class="fa fa-2x fa-youtube"></i></a>&nbsp;
+                        <a href="https://www.flickr.com/photos/noaa_esrl" title="ESRL Flickr"> <i class="fa fa-2x fa-flickr"></i></a>
+                    </div>
+
+                    <div id="policies">
+                        <a href="http://www.noaa.gov/privacy.html">Privacy Policy</a> |
+                        <a href="http://www.esrl.noaa.gov/about/accessibility.html">Accessibility</a> |
+                        <a href="/psd/disclaimer/">Disclaimer</a> |
+
+                        <a href="http://www.usa.gov/">USA.gov</a>
+                        <br />
+                        <a href="/psd/about/contacts.html">Contact Us</a> | <a href="mailto:webmaster.psd&#64;noaa.gov">Webmaster</a> | <a href="/psd/survey/">Take Our Survey</a>
+                        <br />
+                        <a href="/psd/site_index.html">Site Index</a>
+                    </div>
+
+                </div>
+                <!-- end footer -->
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
